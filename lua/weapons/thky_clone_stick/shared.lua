@@ -1,7 +1,7 @@
 local Tool = SWEP
 
 Tool.PrintName = "Clone Wand"
-Tool.Category = "THKY's Weaponsq"
+Tool.Category = "THKY's Weapons"
 Tool.Author = "THKY"
 
 Tool.Instructions = "Right click to copy.\nHold left click to fire."

@@ -4,7 +4,7 @@ local History = undo
 local Duplicator = duplicator
 
 local Timer = 0
-local Target
+local Target = Target or {}
 
 include("shared.lua")
 
@@ -17,13 +17,13 @@ function Tool:PrimaryAttack()
 	Timer = Timer + 1
 	
 	if Timer > 5 then
-		if Target then
+		if Target[Owner] then
 			local Location = Owner:GetShootPos() + (Owner:GetAimVector() * 75)
 			local Velocity = Owner:GetAimVector() * 2000
 			local Angle = Owner:EyeAngles()
 			
 			if Extra.IsInWorld(Location) then
-				local Entity = Duplicator.CreateEntityFromTable(Owner,Target)
+				local Entity = Duplicator.CreateEntityFromTable(Owner,Target[Owner])
 				local Physics = Entity:GetPhysicsObject()
 				
 				if Physics:IsValid() then
@@ -56,7 +56,7 @@ function Tool:SecondaryAttack()
 	
 	if Result.Entity then
 		if Duplicator.IsAllowed(Result.Entity:GetClass()) then
-			Target = Duplicator.CopyEntTable(Result.Entity)
+			Target[Owner] = Duplicator.CopyEntTable(Result.Entity)
 			Owner:EmitSound(Sounds.Select)
 			
 			if Result.Entity:GetPhysicsObject():IsValid() then
@@ -74,7 +74,7 @@ function Tool:Reload()
 	local Owner = self:GetOwner()
 	
 	if Target then
-		Target = nil
+		Target[Owner] = nil
 		Owner:EmitSound(Sounds.Clear)
 		Owner:PrintMessage(HUD_PRINTCENTER,"Cleared selection.")
 	end
