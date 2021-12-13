@@ -35,10 +35,10 @@ function Tool:PrimaryAttack()
 					Physics:Wake()
 				end
 				
-				History.Create("Clone Wand " .. tostring(Entity))
-				History.AddEntity(Entity)
-				History.SetPlayer(Owner)
-				History.Finish()
+				undo.Create("prop")
+					undo.AddEntity(Entity)
+					undo.SetPlayer(Owner)
+				undo.Finish("Clone Wand " .. tostring(Entity))
 				
 				Owner:EmitSound(Sounds.Fire)
 			else
