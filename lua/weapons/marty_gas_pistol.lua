@@ -54,7 +54,6 @@ function SWEP:PrimaryAttack()
 
 	ent:SetModel( "models/props_junk/propane_tank001a.mdl" )
 	ent:SetOwner(self.Owner)
-	-- ent:SetGravity(0)
 
 	local aimvec = owner:EyeAngles():Forward()
 	local pos = aimvec * 48
@@ -63,6 +62,7 @@ function SWEP:PrimaryAttack()
 	ent:SetPos( pos )
 	ent:SetAngles( owner:EyeAngles() + Angle(90) )
 	ent:Spawn()
+	ent:SetGravity(0)
 	
 	local phys = ent:GetPhysicsObject()
 	if ( not phys:IsValid() ) then ent:Remove() return end
