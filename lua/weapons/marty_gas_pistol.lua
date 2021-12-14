@@ -70,12 +70,10 @@ function SWEP:PrimaryAttack()
 	aimvec:Mul( 50000 )
 	aimvec:Add( VectorRand( -10, 10 ) )
 	phys:ApplyForceCenter( aimvec )
- 
-	cleanup.Add( owner, "props", ent )
- 
+	
 	undo.Create( "prop" )
 		undo.AddEntity( ent )
 		undo.SetPlayer( owner )
 	undo.Finish("Gas Canister")
-	owner:AddCleanup("prop", ent)
+	owner:AddCleanup("props", ent)
 end
