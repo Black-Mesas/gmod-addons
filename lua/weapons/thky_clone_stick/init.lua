@@ -39,6 +39,8 @@ function Tool:PrimaryAttack()
 				History.AddEntity(Entity)
 				History.SetPlayer(Owner)
 				History.Finish("Clone Wand " .. tostring(Entity))
+
+				Owner:AddCleanup("prop", Entity)
 				
 				Owner:EmitSound(Sounds.Fire)
 			else

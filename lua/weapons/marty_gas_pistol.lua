@@ -77,4 +77,5 @@ function SWEP:PrimaryAttack()
 		undo.AddEntity( ent )
 		undo.SetPlayer( owner )
 	undo.Finish("Gas Canister")
+	owner:AddCleanup("prop", ent)
 end
