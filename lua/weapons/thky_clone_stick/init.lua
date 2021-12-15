@@ -11,6 +11,24 @@ include("shared.lua")
 local Ray = include("include/ray.lua")
 local Sounds = include("include/sounds.lua")
 
+if SERVER then
+	util.AddNetworkString("WandSelect")
+
+	local WandSelectReceived = function(length, plr)
+		local model = net.ReadString()
+
+		local dt = {
+			Class = "prop_physics",
+			Pos = Vector(),
+			Angle = Angle(),
+			DT = {},
+			Model = model,
+		}
+	end
+
+	net.Receive("WandSelect", WandSelectReceived)
+end
+
 function Tool:PrimaryAttack()
 	local Owner = self:GetOwner()
 
@@ -20,7 +38,7 @@ function Tool:PrimaryAttack()
 		if Target[Owner] then
 			local Location = Owner:GetShootPos() + (Owner:GetAimVector() * 75)
 			local Velocity = Owner:GetAimVector() * 2000
-			local Angle = Owner:EyeAngles()
+			local EyeAngle = Owner:EyeAngles()
 
 			if Extra.IsInWorld(Location) then
 				local Entity = Duplicator.CreateEntityFromTable(Owner,Target[Owner])
@@ -31,7 +49,7 @@ function Tool:PrimaryAttack()
 
 					Physics:SetPos(Location)
 					Physics:SetVelocity(Velocity)
-					Physics:SetAngles(Angle)
+					Physics:SetAngles(EyeAngle)
 					Physics:Wake()
 				end
 

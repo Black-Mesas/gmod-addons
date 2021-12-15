@@ -45,7 +45,7 @@ function SWEP:PrimaryAttack()
 	if ( not owner:IsValid() ) then return end
 
 	self:EmitSound( self.ShootSound )
- 
+
 	if ( CLIENT ) then return end
 
 	local ent = ents.Create( "prop_physics" )
@@ -53,7 +53,7 @@ function SWEP:PrimaryAttack()
 	if ( not ent:IsValid() ) then return end
 
 	ent:SetModel( "models/props_junk/propane_tank001a.mdl" )
-	ent:SetOwner(self.Owner)
+	ent:SetOwner(owner)
 
 	local aimvec = owner:EyeAngles():Forward()
 	local pos = aimvec * 48
@@ -63,14 +63,15 @@ function SWEP:PrimaryAttack()
 	ent:SetAngles( owner:EyeAngles() + Angle(90) )
 	ent:Spawn()
 	ent:SetGravity(0)
-	
+
 	local phys = ent:GetPhysicsObject()
 	if ( not phys:IsValid() ) then ent:Remove() return end
- 
+
 	aimvec:Mul( 50000 )
 	aimvec:Add( VectorRand( -10, 10 ) )
+	aimvec:Add( owner:GetVelocity() )
 	phys:ApplyForceCenter( aimvec )
-	
+
 	undo.Create( "prop" )
 		undo.AddEntity( ent )
 		undo.SetPlayer( owner )
