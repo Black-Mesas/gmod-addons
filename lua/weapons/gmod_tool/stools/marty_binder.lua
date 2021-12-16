@@ -16,10 +16,7 @@ function TOOL:LeftClick(trace)
     local entity = trace.Entity
     local model = entity:GetModel()
 
-    local fake = ents.Create("prop_ragdoll")
     local ragdoll = ents.Create("prop_ragdoll")
-    fake:SetModel(model)
-    fake:SetPos(entity:GetPos())
     ragdoll:SetModel(model)
     ragdoll:SetPos(entity:GetPos())
     print("create ragdoll")
@@ -31,16 +28,15 @@ function TOOL:LeftClick(trace)
 
     entity:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 
-    boundNpcs[entity] = fake
+    boundNpcs[entity] = ragdoll
 
-    fake:Spawn()
     ragdoll:Spawn()
 
     local clean = {}
 
     print("Bone count", entity:GetBoneCount() - 1)
 
-    for i = 0, entity:GetPhysicsObjectCount() - 1 do
+    for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
         local bone = ragdoll:GetPhysicsObjectNum( i )
 
         if ( IsValid(bone) ) then
@@ -50,34 +46,27 @@ function TOOL:LeftClick(trace)
             if ( pos ) then bone:SetPos( pos ) end
             if ( ang ) then bone:SetAngles( ang ) end
 
-            -- local con, rope = constraint.Elastic(
-            --     fake,
-            --     ragdoll,
-            --     i,
-            --     i,
-            --     entity:GetBonePosition(i) - entity:GetPos(),
-            --     entity:GetBonePosition(i) - entity:GetPos(),
-            --     500,
-            --     15,
-            --     1,
-            --     "cable/cable",
-            --     0,
-            --     1,
-            --     Color(255, 255, 255, 255)
-            -- )
-
-            -- if con then
-            --     table.insert(clean, rope)
-            --     table.insert(clean, con)
-            -- end
-
-            con = constraint.NoCollide(fake, ragdoll, i, i)
+            local con, rope = constraint.Elastic(
+                entity,
+                ragdoll,
+                boneId,
+                boneId,
+                pos - entity:GetPos(),
+                pos - entity:GetPos(),
+                500,
+                15,
+                1,
+                "cable/cable",
+                0.5,
+                1,
+                Color(255, 255, 255, 255)
+            )
 
             if con then
+                table.insert(clean, rope)
                 table.insert(clean, con)
             end
         end
-        ragdoll:SetBoneMatrix(i, entity:GetBoneMatrix(i))
     end
 
 
@@ -109,11 +98,11 @@ end
 
 hook.Add("Think", "MartyToolsBoundRagdolls", function()
     for npc, ragdoll in pairs(boundNpcs) do
-        for i = 0, npc:GetPhysicsObjectCount() - 1 do
+        for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
             local bone = ragdoll:GetPhysicsObjectNum( i )
             if ( IsValid(bone) ) then
                 bone:Wake()
-    
+
                 local boneId = ragdoll:TranslatePhysBoneToBone( i )
                 local pos, ang = npc:GetBonePosition( boneId )
                 bone:SetVelocity( npc:GetVelocity() )
