@@ -7,9 +7,30 @@ TOOL.Information = {
 
 local boundNpcs = boundNpcs or {}
 
+-- if SERVER then
+--     util.AddNetworkString("BindNPC")
+-- end
+
+-- if CLIENT then
+
+--  net.Receive("BindNPC", function(length)
+--      local ent = net.ReadEntity()
+--     local ragdoll = net.ReadEntity()
+--     local add = net.ReadBool()
+
+--     if add then
+--         boundNpcs[ent] = ragdoll
+--     else
+--         boundNpcs[ent] = nil
+--     end
+
+-- end)
+-- end
+
 function TOOL:LeftClick(trace)
     if (IsValid(trace.Entity) && !trace.Entity:IsNPC()) then return false end
-    if (CLIENT) then return true end
+    if (!duplicator.IsAllowed(trace.Entity:GetClass())) then return false end
+    if (CLIENT) then trace.Entity:SetIK(false) return true end
 
     print("start bind")
 
@@ -46,26 +67,26 @@ function TOOL:LeftClick(trace)
             if ( pos ) then bone:SetPos( pos ) end
             if ( ang ) then bone:SetAngles( ang ) end
 
-            local con, rope = constraint.Elastic(
-                entity,
-                ragdoll,
-                boneId,
-                boneId,
-                pos - entity:GetPos(),
-                pos - entity:GetPos(),
-                500,
-                15,
-                1,
-                "cable/cable",
-                0.5,
-                1,
-                Color(255, 255, 255, 255)
-            )
+            -- local con, rope = constraint.Elastic(
+            --     entity,
+            --     ragdoll,
+            --     boneId,
+            --     boneId,
+            --     pos - entity:GetPos(),
+            --     bone:GetPos() - ragdoll:GetPos(),
+            --     500,
+            --     150,
+            --     1,
+            --     "cable/cable",
+            --     0.5,
+            --     1,
+            --     Color(255, 255, 255, 255)
+            -- )
 
-            if con then
-                table.insert(clean, rope)
-                table.insert(clean, con)
-            end
+            -- if con then
+            --     table.insert(clean, rope)
+            --     table.insert(clean, con)
+            -- end
         end
     end
 
@@ -73,7 +94,6 @@ function TOOL:LeftClick(trace)
     print("successful constraints: ", #clean)
 
     undo.Create("prop")
-        undo.AddEntity(fake)
         undo.AddEntity(ragdoll)
         for _, v in pairs(clean) do
             undo.AddEntity(v)
@@ -98,6 +118,7 @@ end
 
 hook.Add("Think", "MartyToolsBoundRagdolls", function()
     for npc, ragdoll in pairs(boundNpcs) do
+        if (ragdoll == nil) then continue end
         for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
             local bone = ragdoll:GetPhysicsObjectNum( i )
             if ( IsValid(bone) ) then
@@ -105,9 +126,14 @@ hook.Add("Think", "MartyToolsBoundRagdolls", function()
 
                 local boneId = ragdoll:TranslatePhysBoneToBone( i )
                 local pos, ang = npc:GetBonePosition( boneId )
-                bone:SetVelocity( npc:GetVelocity() )
-                if ( pos ) then bone:SetPos( pos ) end
-                if ( ang ) then bone:SetAngles( ang ) end
+                -- if ( pos ) then bone:SetPos( pos ) end
+                -- if ( ang ) then bone:SetAngles( ang ) end
+
+                local diff = pos - bone:GetPos()
+                local v = bone:GetVelocity()
+                bone:SetVelocity(diff * 10 - (v * 0.5))
+                bone:ApplyForceCenter(diff * 20 * bone:GetMass())
+                bone:ApplyForceOffset(diff * 2, pos + ang:Forward() * 50)
             end
         end
     end
